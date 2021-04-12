@@ -37,23 +37,39 @@
       <a-layout-content
           :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
       >
-        Content
+        <pre>
+          {{ebooks}}
+          {{ebooks2}}
+        </pre>
       </a-layout-content>
     </a-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent,onMounted ,ref,reactive,toRef} from 'vue';
 import axios from "axios";
 
 export default defineComponent({
   name: 'Home',
   setup() {
     console.log("setup");
-    axios.get("http://localhost:9000/ebook/list?name=Vue").then((res)=>{
-      console.log(res);
+    const ebooks=ref();
+    const ebooks1=reactive({books:[]})
+
+    onMounted(()=>{
+      console.log("onMounted")
+      axios.get("http://localhost:9000/ebook/list?name=Vue").then((res)=>{
+        const data=res.data;
+        ebooks.value=data.content;
+        ebooks1.books=data.content;
+        console.log(res);
+      })
     })
 
+    return {
+      ebooks,
+      ebooks2:toRef(ebooks1,"books")
+    };
   }
 });
 </script>
