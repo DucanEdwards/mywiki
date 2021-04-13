@@ -1,6 +1,6 @@
 package com.wsz.mywiki.req;
 
-public class EbookReq {
+public class EbookReq extends PageReq{
     private Long id;
 
     private String name;
