@@ -5,8 +5,9 @@ import com.github.pagehelper.PageInfo;
 import com.wsz.mywiki.domain.Ebook;
 import com.wsz.mywiki.domain.EbookExample;
 import com.wsz.mywiki.mapper.EbookMapper;
-import com.wsz.mywiki.req.EbookReq;
-import com.wsz.mywiki.resp.EbookResp;
+import com.wsz.mywiki.req.EbookQueryReq;
+import com.wsz.mywiki.req.EbookSaveReq;
+import com.wsz.mywiki.resp.EbookQueryResp;
 import com.wsz.mywiki.resp.PageResp;
 import com.wsz.mywiki.util.CopyUtil;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class EbookService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EbookService.class);
 
-    public PageResp<EbookResp> list(EbookReq req) {
+    public PageResp<EbookQueryResp> list(EbookQueryReq req) {
         EbookExample ebookExample = new EbookExample();
         EbookExample.Criteria criteria = ebookExample.createCriteria();
         if(!ObjectUtils.isEmpty(req.getName())) {
@@ -45,12 +46,27 @@ public class EbookService {
 //            ebookRespList.add(ebookResp);
 //        }
 
-        List<EbookResp> ebookRespList = CopyUtil.copyList(ebookList, EbookResp.class);
+        List<EbookQueryResp> ebookRespList = CopyUtil.copyList(ebookList, EbookQueryResp.class);
 
-        PageResp<EbookResp> pageResp = new PageResp<>();
+        PageResp<EbookQueryResp> pageResp = new PageResp<>();
         pageResp.setTotal(pageInfo.getTotal());
         pageResp.setList(ebookRespList);
         return pageResp;
     }
 
+    /**
+     * 保存数据
+     */
+    public void save(EbookSaveReq req){
+        Ebook ebook=CopyUtil.copy(req,Ebook.class);
+        if (ObjectUtils.isEmpty(req.getId())) {
+            // 新增
+            ebookMapper.insert(ebook);
+        }
+        else {
+            // 更新
+            ebookMapper.updateByPrimaryKey(ebook);
+        }
+
+    }
 }
