@@ -160,7 +160,8 @@ export default defineComponent({
       loading.value = true;
       // 如果不清空现有数据，则编辑保存重新加载数据后，再点编辑，则列表显示的还是编辑前的数据
       level1.value = [];
-      axios.get("/doc/all").then((response) => {
+      doc.value.content = editor.txt.html();
+      axios.get("/doc/all",doc.value).then((response) => {
         loading.value = false;
         const data = response.data;
         if (data.success) {
@@ -183,7 +184,8 @@ export default defineComponent({
     // 因为树选择组件的属性状态，会随当前编辑的节点而变化，所以单独声明一个响应式变量
     const treeSelectData = ref();
     treeSelectData.value = [];
-    const doc = ref({});
+    const doc = ref();
+    doc.value={}
     const modalVisible = ref(false);
     const modalLoading = ref(false);
     const editor = new E("#content")
@@ -192,7 +194,7 @@ export default defineComponent({
 
     const handleSave = () => {
       modalLoading.value = true;
-
+      doc.value.content = editor.txt.html();
       axios.post("/doc/save",doc.value).then((res)=>{
         const data=res.data;
         modalLoading.value = false;

@@ -2,8 +2,10 @@ package com.wsz.mywiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.wsz.mywiki.domain.Content;
 import com.wsz.mywiki.domain.Doc;
 import com.wsz.mywiki.domain.DocExample;
+import com.wsz.mywiki.mapper.ContentMapper;
 import com.wsz.mywiki.mapper.DocMapper;
 import com.wsz.mywiki.req.DocQueryReq;
 import com.wsz.mywiki.req.DocSaveReq;
@@ -26,6 +28,9 @@ public class DocService {
 
     @Resource
     private SnowFlake snowFlake;
+
+    @Resource
+    private ContentMapper contentMapper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DocService.class);
 
@@ -71,14 +76,22 @@ public class DocService {
      */
     public void save(DocSaveReq req){
         Doc doc=CopyUtil.copy(req,Doc.class);
+        Content content=CopyUtil.copy(req,Content.class);
         if (ObjectUtils.isEmpty(req.getId())) {
             // 新增
             doc.setId(snowFlake.nextId());
             docMapper.insert(doc);
+
+            content.setId(doc.getId());
+            contentMapper.insert(content);
         }
         else {
             // 更新
             docMapper.updateByPrimaryKey(doc);
+            int count=contentMapper.updateByPrimaryKeyWithBLOBs(content);
+            if (count==0) {
+                contentMapper.insert(content);
+            }
         }
     }
 
