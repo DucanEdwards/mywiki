@@ -1,0 +1,82 @@
+package com.wsz.mywiki.service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.wsz.mywiki.domain.User;
+import com.wsz.mywiki.domain.UserExample;
+import com.wsz.mywiki.mapper.UserMapper;
+import com.wsz.mywiki.req.UserQueryReq;
+import com.wsz.mywiki.req.UserSaveReq;
+import com.wsz.mywiki.resp.UserQueryResp;
+import com.wsz.mywiki.resp.PageResp;
+import com.wsz.mywiki.util.CopyUtil;
+import com.wsz.mywiki.util.SnowFlake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+@Service
+public class UserService {
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private SnowFlake snowFlake;
+
+    private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
+
+    public PageResp<UserQueryResp> list(UserQueryReq req) {
+        UserExample userExample = new UserExample();
+        UserExample.Criteria criteria = userExample.createCriteria();
+        if (!ObjectUtils.isEmpty(req.getLoginName())) {
+            criteria.andLoginNameEqualTo(req.getLoginName());
+        }
+        PageHelper.startPage(req.getPage(),req.getSize());
+        List<User> userList = userMapper.selectByExample(userExample);
+
+        PageInfo<User> pageInfo = new PageInfo<>(userList);
+        LOG.info("总行数：{}", pageInfo.getTotal());
+        LOG.info("总页数：{}", pageInfo.getPages());
+//        List<UserResp> userRespList=new ArrayList<>();
+//        for (User user : userList) {
+////            UserResp userResp=new UserResp();
+////            BeanUtils.copyProperties(user,userResp);
+//            // 复制一个对象
+//            UserResp userResp = CopyUtil.copy(user, UserResp.class);
+//            userRespList.add(userResp);
+//        }
+
+        List<UserQueryResp> userRespList = CopyUtil.copyList(userList, UserQueryResp.class);
+
+        PageResp<UserQueryResp> pageResp = new PageResp<>();
+        pageResp.setTotal(pageInfo.getTotal());
+        pageResp.setList(userRespList);
+        return pageResp;
+    }
+
+    /**
+     * 保存数据
+     */
+    public void save(UserSaveReq req){
+        User user=CopyUtil.copy(req,User.class);
+        if (ObjectUtils.isEmpty(req.getId())) {
+            // 新增
+            user.setId(snowFlake.nextId());
+            userMapper.insert(user);
+        }
+        else {
+            // 更新
+            userMapper.updateByPrimaryKey(user);
+        }
+    }
+
+    public void delete(Long id) {
+        userMapper.deleteByPrimaryKey(id);
+    }
+
+
+}
