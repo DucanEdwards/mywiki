@@ -7,6 +7,7 @@ import com.wsz.mywiki.domain.Doc;
 import com.wsz.mywiki.domain.DocExample;
 import com.wsz.mywiki.mapper.ContentMapper;
 import com.wsz.mywiki.mapper.DocMapper;
+import com.wsz.mywiki.mapper.DocMapperCust;
 import com.wsz.mywiki.req.DocQueryReq;
 import com.wsz.mywiki.req.DocSaveReq;
 import com.wsz.mywiki.resp.DocQueryResp;
@@ -28,6 +29,9 @@ public class DocService {
 
     @Resource
     private SnowFlake snowFlake;
+
+    @Resource
+    private DocMapperCust docMapperCust;
 
     @Resource
     private ContentMapper contentMapper;
@@ -81,6 +85,8 @@ public class DocService {
         if (ObjectUtils.isEmpty(req.getId())) {
             // 新增
             doc.setId(snowFlake.nextId());
+            doc.setViewCount(0);
+            doc.setVoteCount(0);
             docMapper.insert(doc);
 
             content.setId(doc.getId());
@@ -109,6 +115,8 @@ public class DocService {
 
     public String findContent(Long id) {
         Content content=contentMapper.selectByPrimaryKey(id);
+        // 文档阅读树加1
+        docMapperCust.increaseViewCount(id);
         if(ObjectUtils.isEmpty(content)) {
             return "";
         }
