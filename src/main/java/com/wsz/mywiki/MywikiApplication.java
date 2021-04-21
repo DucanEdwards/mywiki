@@ -6,9 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @MapperScan("com.wsz.mywiki.mapper")
+@EnableScheduling
 public class MywikiApplication {
 
     private static final Logger LOG = LoggerFactory.getLogger(MywikiApplication.class);
