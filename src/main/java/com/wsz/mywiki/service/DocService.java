@@ -18,7 +18,6 @@ import com.wsz.mywiki.util.CopyUtil;
 import com.wsz.mywiki.util.RedisUtil;
 import com.wsz.mywiki.util.RequestContext;
 import com.wsz.mywiki.util.SnowFlake;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -49,8 +48,8 @@ public class DocService {
     @Resource
     public WsService wsService;
 
-    @Resource
-    private RocketMQTemplate rocketMQTemplate;
+//    @Resource
+//    private RocketMQTemplate rocketMQTemplate;
 
     private static final Logger LOG = LoggerFactory.getLogger(DocService.class);
 
@@ -156,8 +155,8 @@ public class DocService {
         }
         Doc docDb = docMapper.selectByPrimaryKey(id);
         String log_id = MDC.get("LOG_ID");
-//        wsService.sendInfo("【" + docDb.getName() + "】被点赞！",log_id);
-        rocketMQTemplate.convertAndSend("VOTE_TOPIC","【" + docDb.getName() + "】被点赞！");
+        wsService.sendInfo("【" + docDb.getName() + "】被点赞！",log_id);
+//        rocketMQTemplate.convertAndSend("VOTE_TOPIC","【" + docDb.getName() + "】被点赞！");
     }
 
     public void updateEbookInfo() {
